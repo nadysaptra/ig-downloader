@@ -1,0 +1,15 @@
+services:
+  ig_downloader:
+    build: .
+    container_name: ig_downloader
+    environment:
+      - IG_USERNAME=kapuk2026
+      - TARGET_PROFILE="nook.napa iambaiifernn xiianger amberchan65 cocoxiyyy_ ejahazel__ kinandaputriii tiaraaurelie_17 fbyana hnxtasia lyyyy.chn 717_xiong"
+      - TELEGRAM_BOT_TOKEN=8692402692:AAH4OQSBCBsLibx8PscUa1EMfUN7aEM6Ysw
+      - TELEGRAM_CHAT_ID=-1003984616468
+    volumes:
+      # Maps your SCP'd session folder to the container's default config path
+      - ./config:/root/.config/instaloader
+      # Maps a local downloads folder to save the media
+      - ./downloads:/downloads
+    restart: unless-stopped # Runs once and stops. Use cron or a scheduler to run periodically.
