@@ -4,7 +4,7 @@ TOKEN="8692402692:AAH4OQSBCBsLibx8PscUa1EMfUN7aEM6Ysw"
 CHAT_ID="-1003984616468"
 BASE_DIR="$HOME/ig-downloader/downloads"
 TARGETS_FILE="$HOME/ig-downloader/targets.txt"
-DAILY_LIMIT=5
+DAILY_LIMIT=10
 BUFFER=5  # Your safety buffer
 CURRENT_DATE=$(date +"%Y-%m-%d")
 
