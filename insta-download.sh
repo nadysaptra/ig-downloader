@@ -7,6 +7,18 @@ BASE_DIR="$HOME/ig-downloader"
 DOWNLOAD_DIR="$BASE_DIR/downloads"
 TARGETS_FILE="$BASE_DIR/targets.txt"
 DL_LIMIT=10
+
+PROXY_USER="tcebfiji"
+PROXY_PASS="zmnglapu85ev"
+LOCAL_GATEWAY="127.0.0.1:8118"
+
+export HTTP_PROXY="http://${PROXY_USER}:${PROXY_PASS}@${LOCAL_GATEWAY}"
+export HTTPS_PROXY="http://${PROXY_USER}:${PROXY_PASS}@${LOCAL_GATEWAY}"
+# ---------------------
+
+echo "🚀 Instagram Download started at $(date)"
+echo "🌐 Outbound traffic routed through HAProxy rotation gateway (Port 8118)"
+
 # ---------------------
 
 echo "🚀 Instagram Download started at $(date)"

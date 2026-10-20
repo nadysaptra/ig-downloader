@@ -1,0 +1,11 @@
+{
+    "extractor": {
+        "instagram": {
+"session": "./gallery-dl.json",
+            "directory": []
+        }
+    },
+    "output": {
+        "base-directory": "downloads/{user}"
+    }
+}

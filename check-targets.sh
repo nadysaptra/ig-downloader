@@ -3,8 +3,8 @@
 # Configuration
 TARGETS_FILE="$HOME/ig-downloader/targets.txt"
 BACKUP_FILE="$HOME/ig-downloader/targets.bak"
-SESSION_FILE="$HOME/.config/instaloader/session-kapuk2026" # Update username if needed
-USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+SESSION_FILE="$HOME/.config/instaloader/session-kapuk2026"
+USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 # Check if targets file exists
 if [ ! -f "$TARGETS_FILE" ]; then
@@ -24,35 +24,52 @@ echo "----------------------------------------"
 while IFS= read -r username || [ -n "$username" ]; do
     # Skip empty lines or comments
     [[ -z "$username" || "$username" =~ ^# ]] && continue
-    
+
     # Trim whitespace
     username=$(echo "$username" | tr -d '[:space:]')
-    
-    echo -n "Checking @$username... "
-    
-    # Check profile status via Instagram's public endpoint
-    # (Using a standard User-Agent to avoid immediate blocks)
-    STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-        -H "User-Agent: $USER_AGENT" \
-        "https://www.instagram.com/$username/")
 
-    if [ "$STATUS_CODE" -eq 200 ]; then
-        echo "Active (200)"
-        echo "$username" >> "$TEMP_FILE"
-    elif [ "$STATUS_CODE" -eq 404 ]; then
+    echo -n "Checking @$username... "
+
+    # 1. Capture response headers cleanly (using direct domain format to bypass root 301)
+    # Using lowercase header evaluation via tr to avoid edge engine quirks
+    HEADERS=$(curl -s -I -A "$USER_AGENT" "https://www.instagram.com/$username/" | tr '[:upper:]' '[:lower:]')
+
+    # Extract the HTTP status code explicitly
+    STATUS_CODE=$(echo "$HEADERS" | grep "^http/" | awk '{print $2}' | head -n 1)
+
+    # 2. Evaluation Ruleset
+    if echo "$HEADERS" | grep -q "x-compress-hint: regular"; then
+        # Meta flags dead/moved client-side fallback layouts with this specific header
+        echo "NOT FOUND (Edge Flag) -> Removing"
+
+    elif echo "$HEADERS" | grep -q "location:.*\/accounts\/login\/"; then
+        # Direct fallback string check if it tries to throw a redirection payload
+        echo "REDIRECTED TO LOGIN -> Removing (Changed/Removed)"
+
+    elif [[ "$STATUS_CODE" == "404" ]]; then
         echo "NOT FOUND (404) -> Removing"
+
+    elif [[ "$STATUS_CODE" == "429" ]] || echo "$HEADERS" | grep -q "location:.*\/challenge\/"; then
+        # Keeping if your ARM node hits an intentional infrastructure limit or challenge gate
+        echo "RATE LIMITED / CHALLENGE WALL -> Keeping for safety"
+        echo "$username" >> "$TEMP_FILE"
+
+    elif [[ "$STATUS_CODE" == "200" || "$STATUS_CODE" == "302" ]]; then
+        echo "Active ($STATUS_CODE) -> Keeping"
+        echo "$username" >> "$TEMP_FILE"
+
     else
-        # If it's a 302 (redirect to login) or 429 (rate limited), keep it to be safe
+        # Catch-all for gateway dropouts, connection timeouts, or temporary 5xx infrastructure errors
         echo "Uncertain ($STATUS_CODE) -> Keeping for safety"
         echo "$username" >> "$TEMP_FILE"
     fi
-    
-    # Small sleep to mitigate aggressive rate-limiting on your ARM server
-    sleep 2
+
+    # 4-second delay to preserve IP standing against rate limits
+    sleep 4
 
 done < "$TARGETS_FILE"
 
-# Overwrite the original file with the valid targets
+# Overwrite the original list with verified handles
 mv "$TEMP_FILE" "$TARGETS_FILE"
 
 echo "----------------------------------------"
