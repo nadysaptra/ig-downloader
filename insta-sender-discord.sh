@@ -4,7 +4,7 @@
 # CONFIGURATION
 # ==========================================
 BOT_TOKEN=""
-GUILD_ID="1526258089710584053"
+GUILD_ID=""
 IG_DOWNLOAD_DIR="./downloads"
 
 # Tracking database
