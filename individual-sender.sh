@@ -1,9 +1,17 @@
 #!/bin/bash
 # --- CONFIGURATION ---
-TOKEN="8692402692:AAH4OQSBCBsLibx8PscUa1EMfUN7aEM6Ysw"
-CHAT_ID="-1003984616468"
-BASE_DIR="$HOME/ig-downloader/downloads"
-TARGETS_FILE="$HOME/ig-downloader/targets.txt"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../.env" ]; then
+    set -a; source "$SCRIPT_DIR/../.env"; set +a
+else
+    echo "Error: .env file not found at $SCRIPT_DIR/.env" >&2
+    exit 1
+fi
+
+TOKEN=$TELEGRAM_BOT_TOKEN
+CHAT_ID="$TELEGRAM_CHAT_ID"
+BASE_DIR="$SCRIPT_DIR/downloads"
+TARGETS_FILE="$SCRIPT_DIR/targets.txt"
 DAILY_LIMIT=10
 BUFFER=5
 CURRENT_DATE=$(date +"%Y-%m-%d")

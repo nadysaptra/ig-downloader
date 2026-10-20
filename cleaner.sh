@@ -1,5 +1,6 @@
 #!/bin/bash
-BASE_DIR="/root/ig-downloader/downloads"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$SCRIPT_DIR/downloads"
 
 echo "🧹 Starting Instagram cleanup: $(date)"
 

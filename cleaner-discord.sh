@@ -1,6 +1,7 @@
 #!/bin/bash
-BASE_DIR="/root/ig-downloader/downloads"
-CENTRAL_LOG="/root/ig-downloader/sent_to_discord_ig.txt"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$SCRIPT_DIR/downloads"
+CENTRAL_LOG="$SCRIPT_DIR/sent_to_discord_ig.txt"
 
 echo "🧹 Starting Discord Instagram cleanup: $(date)"
 

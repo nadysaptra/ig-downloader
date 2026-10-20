@@ -1,58 +1,41 @@
 #!/bin/bash
 
 # --- CONFIGURATION ---
-IG_USERNAME="kapuk2026"
-SESSION_FILE="config/session-kapuk2026"
-BASE_DIR="$HOME/ig-downloader"
-DOWNLOAD_DIR="$BASE_DIR/downloads"
-TARGETS_FILE="$BASE_DIR/targets.txt"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../.env" ]; then
+    set -a; source "$SCRIPT_DIR/../.env"; set +a
+fi
+
+if [ -f "$SCRIPT_DIR/venv/bin/instaloader" ]; then
+    INSTALOADER="$SCRIPT_DIR/venv/bin/instaloader"
+else
+    INSTALOADER="instaloader"
+fi
+SESSION_FILE="$SCRIPT_DIR/config/session-${IG_USERNAME}"
+DOWNLOAD_DIR="$SCRIPT_DIR/downloads"
+TARGETS_FILE="$SCRIPT_DIR/targets.txt"
 DL_LIMIT=10
 
-PROXY_USER="tcebfiji"
-PROXY_PASS="zmnglapu85ev"
-LOCAL_GATEWAY="127.0.0.1:8118"
-
-export HTTP_PROXY="http://${PROXY_USER}:${PROXY_PASS}@${LOCAL_GATEWAY}"
-export HTTPS_PROXY="http://${PROXY_USER}:${PROXY_PASS}@${LOCAL_GATEWAY}"
+if curl -s --connect-timeout 2 "http://${LOCAL_GATEWAY}" -o /dev/null 2>/dev/null; then
+    export HTTP_PROXY="http://${PROXY_USER}:${PROXY_PASS}@${LOCAL_GATEWAY}"
+    export HTTPS_PROXY="http://${PROXY_USER}:${PROXY_PASS}@${LOCAL_GATEWAY}"
+    echo "🌐 Proxy active: $LOCAL_GATEWAY"
+else
+    echo "⚠️  Proxy not reachable — running without proxy"
+fi
 # ---------------------
 
-echo "🚀 Instagram Download started at $(date)"
-echo "🌐 Outbound traffic routed through HAProxy rotation gateway (Port 8118)"
+echo "📸 Posts / Reels / Highlights Download started at $(date)"
 
-# ---------------------
-
-echo "🚀 Instagram Download started at $(date)"
-
-# --- PASS 1: STORIES ONLY (High Priority) ---
-echo "🔥 Phase 1: Downloading Stories first..."
 while IFS= read -r TARGET || [[ -n "$TARGET" ]]; do
     TARGET=$(echo "$TARGET" | xargs)
     [[ -z "$TARGET" || "$TARGET" =~ ^# ]] && continue
 
-    echo "⚡ High Priority: @$TARGET Stories..."
-    instaloader --sessionfile="$BASE_DIR/$SESSION_FILE" \
-                --login="$IG_USERNAME" \
-                --stories --no-posts \
-                --dirname-pattern="$DOWNLOAD_DIR/{target}" \
-                "$TARGET"
-    
-    # Short sleep to avoid being flagged during rapid metadata requests
-    sleep 5 
-done < "$TARGETS_FILE"
-
-echo "⏳ Stories secured. Resting for 60s before Phase 2..."
-sleep 60
-
-# --- PASS 2: POSTS & HIGHLIGHTS ---
-echo "📂 Phase 2: Downloading remaining media..."
-while IFS= read -r TARGET || [[ -n "$TARGET" ]]; do
-    TARGET=$(echo "$TARGET" | xargs)
-    [[ -z "$TARGET" || "$TARGET" =~ ^# ]] && continue
-
-    echo "📸 Processing @$TARGET (Posts/Highlights)..."
-    instaloader --sessionfile="$BASE_DIR/$SESSION_FILE" \
+    echo "📂 Processing @$TARGET (Posts / Reels / Highlights)..."
+    "$INSTALOADER" --sessionfile="$SESSION_FILE" \
                 --login="$IG_USERNAME" \
                 --highlights \
+                --reels \
                 --fast-update \
                 --count=$DL_LIMIT \
                 --dirname-pattern="$DOWNLOAD_DIR/{target}" \

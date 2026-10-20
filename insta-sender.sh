@@ -1,26 +1,22 @@
 #!/bin/bash
 # --- CONFIGURATION ---
-#TOKEN="8692402692:AAH4OQSBCBsLibx8PscUa1EMfUN7aEM6Ysw"
-# --- CONFIGURATION LOGIC ---
-ENV_FILE="$HOME/.env"
-
-if [ -f "$ENV_FILE" ]; then
-    source "$ENV_FILE"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../.env" ]; then
+    set -a; source "$SCRIPT_DIR/../.env"; set +a
 else
-    echo "Error: Configuration file .env not found." >&2
+    echo "Error: .env file not found at $SCRIPT_DIR/.env" >&2
     exit 1
 fi
 
-# Ensure tokens are set
-if [ -z "$TELEGRAM_TOKEN" ]; then
-    echo "Error: TELEGRAM_TOKEN is not defined." >&2
+if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
+    echo "Error: TELEGRAM_BOT_TOKEN is not defined in .env" >&2
     exit 1
 fi
 
-TOKEN=$TELEGRAM_TOKEN
-CHAT_ID="-1003984616468"
-BASE_DIR="$HOME/ig-downloader/downloads"
-TARGETS_FILE="$HOME/ig-downloader/targets.txt"
+TOKEN=$TELEGRAM_BOT_TOKEN
+CHAT_ID="$TELEGRAM_CHAT_ID"
+BASE_DIR="$SCRIPT_DIR/downloads"
+TARGETS_FILE="$SCRIPT_DIR/targets.txt"
 DAILY_LIMIT=10
 BUFFER=5  
 CURRENT_DATE=$(date +"%Y-%m-%d")

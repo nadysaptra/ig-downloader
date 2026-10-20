@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 
-# Resolve absolute path of the directory containing this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../.env" ]; then
+    set -a; source "$SCRIPT_DIR/../.env"; set +a
+fi
+
+if [ -f "$SCRIPT_DIR/venv/bin/gallery-dl" ]; then
+    GALLERY_DL="$SCRIPT_DIR/venv/bin/gallery-dl"
+else
+    GALLERY_DL="gallery-dl"
+fi
 
 # File paths
 TARGETS_FILE="$SCRIPT_DIR/targets.txt"
@@ -26,7 +34,7 @@ mkdir -p "$OUTPUT_DIR"
 
 # Clear gallery-dl cache to force fresh cookie/config usage
 echo "Clearing gallery-dl session cache..."
-gallery-dl --clear-cache instagram >/dev/null 2>&1
+"$GALLERY_DL" --clear-cache instagram >/dev/null 2>&1
 
 echo "=========================================="
 echo " Starting Instagram Bulk Downloader"
@@ -40,15 +48,12 @@ fi
 
 # Read each line from targets.txt, ignoring empty lines and comments
 while IFS= read -r username || [ -n "$username" ]; do
-    # Trim whitespace
     username=$(echo "$username" | xargs)
 
-    # Skip empty lines or commented lines starting with #
     if [ -z "$username" ] || [[ "$username" =~ ^# ]]; then
         continue
     fi
 
-    # Strip leading @ if present
     username="${username#@}"
 
     user_dir="$OUTPUT_DIR/$username"
@@ -60,14 +65,13 @@ while IFS= read -r username || [ -n "$username" ]; do
     echo " Destination: $user_dir"
     echo "------------------------------------------"
 
-    gallery-dl "${G_FLAGS[@]}" \
+    "$GALLERY_DL" "${G_FLAGS[@]}" \
         --cookies "$COOKIES_FILE" \
         --directory "$user_dir" \
         --download-archive "$user_dir/archive.sqlite" \
         --sleep 2-4 \
         "https://www.instagram.com/$username/"
 
-    # Delay between user profiles to mitigate account flags
     sleep 5
 done < "$TARGETS_FILE"
 

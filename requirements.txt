@@ -1,0 +1,2 @@
+instaloader==4.15.3
+gallery_dl==1.32.17

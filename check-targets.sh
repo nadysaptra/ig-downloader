@@ -1,9 +1,14 @@
 #!/bin/bash
 
 # Configuration
-TARGETS_FILE="$HOME/ig-downloader/targets.txt"
-BACKUP_FILE="$HOME/ig-downloader/targets.bak"
-SESSION_FILE="$HOME/.config/instaloader/session-kapuk2026"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../.env" ]; then
+    set -a; source "$SCRIPT_DIR/../.env"; set +a
+fi
+
+TARGETS_FILE="$SCRIPT_DIR/targets.txt"
+BACKUP_FILE="$SCRIPT_DIR/targets.bak"
+SESSION_FILE="$SCRIPT_DIR/config/session-${IG_USERNAME}"
 USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 # Check if targets file exists

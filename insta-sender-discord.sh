@@ -3,8 +3,11 @@
 # ==========================================
 # CONFIGURATION
 # ==========================================
-BOT_TOKEN=""
-GUILD_ID=""
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../.env" ]; then
+    set -a; source "$SCRIPT_DIR/../.env"; set +a
+fi
+
 IG_DOWNLOAD_DIR="./downloads"
 
 # Tracking database
