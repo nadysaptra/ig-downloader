@@ -3,7 +3,7 @@
 # ==========================================
 # CONFIGURATION
 # ==========================================
-BOT_TOKEN="MTUyNjI1OTM4MzQ5Mzk4NDM3Ng.Gyon8q.dyAZPba4kEV64AK2YRbCYVmTKx1aH1A4RSfaD4"
+BOT_TOKEN=""
 GUILD_ID="1526258089710584053"
 IG_DOWNLOAD_DIR="./downloads"
 
