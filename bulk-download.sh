@@ -11,34 +11,22 @@ else
     GALLERY_DL="gallery-dl"
 fi
 
-# File paths
 TARGETS_FILE="$SCRIPT_DIR/targets.txt"
 CONFIG_FILE="$SCRIPT_DIR/config/config.json"
 COOKIES_FILE="$SCRIPT_DIR/cookies.txt"
 OUTPUT_DIR="$SCRIPT_DIR/downloads"
 
-# Check if targets.txt exists
 if [ ! -f "$TARGETS_FILE" ]; then
     echo "Error: $TARGETS_FILE not found!"
     exit 1
 fi
 
-# Check if working cookies file exists
 if [ ! -f "$COOKIES_FILE" ]; then
     echo "Error: Working cookies file not found at $COOKIES_FILE"
     exit 1
 fi
 
-# Create downloads directory if it doesn't exist
 mkdir -p "$OUTPUT_DIR"
-
-# Clear gallery-dl cache to force fresh cookie/config usage
-echo "Clearing gallery-dl session cache..."
-"$GALLERY_DL" --clear-cache instagram >/dev/null 2>&1
-
-echo "=========================================="
-echo " Starting Instagram Bulk Downloader"
-echo "=========================================="
 
 # Build base arguments array
 G_FLAGS=()
@@ -46,7 +34,22 @@ if [ -f "$CONFIG_FILE" ]; then
     G_FLAGS+=("--config" "$CONFIG_FILE")
 fi
 
-# Read each line from targets.txt, ignoring empty lines and comments
+# Add proxy if reachable
+if curl -s --connect-timeout 2 "http://${LOCAL_GATEWAY}" -o /dev/null 2>/dev/null; then
+    PROXY_URL="http://${PROXY_USER}:${PROXY_PASS}@${LOCAL_GATEWAY}"
+    G_FLAGS+=("--proxy" "$PROXY_URL")
+    echo "Proxy active: $LOCAL_GATEWAY"
+else
+    echo "Proxy not reachable — running without proxy"
+fi
+
+echo "Clearing gallery-dl session cache..."
+"$GALLERY_DL" --clear-cache instagram >/dev/null 2>&1
+
+echo "=========================================="
+echo " Starting Instagram Bulk Downloader"
+echo "=========================================="
+
 while IFS= read -r username || [ -n "$username" ]; do
     username=$(echo "$username" | xargs)
 
